@@ -1,6 +1,6 @@
 ## Simple chat
 
-This is a client-server Java application for LAN used for testing pursposes like client identification, custom protocol messaging, etc.
+This is a client-server Java application for LAN used for testing pursposes like client identification, custom protocol messaging, UDP broadcasting, etc
 
 ## Prerrequisites
 
