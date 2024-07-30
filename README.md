@@ -4,7 +4,9 @@ This is a client-server Java application for LAN used for testing pursposes like
 
 ## Prerrequisites
 
-Java
+- Java
+- In the server firewall, open all the TCP ports only for LAN (private network).
+- In the client/s firewall, open all the UDP ports only for LAN (private network).
 
 ## Usage
 

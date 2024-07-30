@@ -32,7 +32,7 @@ public class ClientTCP implements Runnable {
             // Enviar el puerto UDP asignado por el SO al servidor
             DatagramSocket udpSocket = new DatagramSocket();
             int udpPort = udpSocket.getLocalPort();
-            System.out.println("Cliente UDP escuchando en el puerto " + udpSocket.getLocalPort());
+            System.out.println("Cliente UDP escuchando en el puerto " + udpPort);
             String udpPortPackage = UDP_PORT_MESSAGE_PATTERN.replaceFirst("<udpPort>", String.valueOf(udpPort));
             salida.println(udpPortPackage);
 

@@ -40,7 +40,7 @@ public class ClientHandler implements Runnable {
             String udpPortPackage = in.readLine();
             String value = udpPortPackage.split(":")[1];
             int clientUdpPort = Integer.parseInt(value); 
-            System.out.println("Puerto UDP del CID:" + clientId + ": " + clientUdpPort);
+            System.out.println("Puerto UDP del CID:" + clientId + " " + clientAddress + ":" + clientUdpPort);
 
             synchronized (clients) {
                 clients.add(new Client(clientId, clientAddress, clientPort, clientUdpPort, out));
