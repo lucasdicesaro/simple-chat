@@ -1,11 +1,11 @@
 package client;
+
 import java.io.*;
 import java.net.*;
 
 public class ClientTCP implements Runnable {
 
     private static int clientId;
-    private static final String UDP_PORT_MESSAGE_PATTERN = "UDP:<udpPort>";
     private String serverAddress;
     private int tcpPort;
 
@@ -18,22 +18,20 @@ public class ClientTCP implements Runnable {
     public void run() {
 
         try (Socket socket = new Socket(serverAddress, tcpPort);
-            BufferedReader entrada = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            PrintWriter salida = new PrintWriter(socket.getOutputStream(), true);
-            BufferedReader teclado = new BufferedReader(new InputStreamReader(System.in))) {
+                BufferedReader entrada = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                PrintWriter salida = new PrintWriter(socket.getOutputStream(), true);
+                BufferedReader teclado = new BufferedReader(new InputStreamReader(System.in))) {
 
-            // Leer el ID asignado por el servidor
+            // Leer el ClientId asignado por el servidor
             String mensaje = entrada.readLine();
-            if (mensaje.startsWith("CID:")) {
-                clientId = Integer.parseInt(mensaje.substring(4));
-                System.out.println("Tu ID es: " + clientId);
-            }
+            clientId = MessageHandler.unpackClientId(mensaje);
+            System.out.println("ClientId asignado por el servidor: " + clientId);
 
-            // Enviar el puerto UDP asignado por el SO al servidor
+            // Enviar al servidor el puerto UDP asignado por el SO
             DatagramSocket udpSocket = new DatagramSocket();
             int udpPort = udpSocket.getLocalPort();
-            System.out.println("Cliente UDP escuchando en el puerto " + udpPort);
-            String udpPortPackage = UDP_PORT_MESSAGE_PATTERN.replaceFirst("<udpPort>", String.valueOf(udpPort));
+            System.out.println("Puerto UDP asignado por el SO: " + udpPort);
+            String udpPortPackage = MessageHandler.packUDPPort(udpPort);
             salida.println(udpPortPackage);
 
             Runnable clientUDP = new ClientUDP(udpSocket, clientId);
@@ -43,9 +41,11 @@ public class ClientTCP implements Runnable {
             new Thread(clientTCPReader).start();
 
             String mensajeUsuario;
+            System.out.print("> ");
             while ((mensajeUsuario = teclado.readLine()) != null) {
                 if (!mensajeUsuario.isBlank()) {
                     salida.println(mensajeUsuario);
+                    System.out.println("Enviado: " + mensajeUsuario);
                 }
             }
 

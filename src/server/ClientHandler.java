@@ -1,14 +1,15 @@
 package server;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.HashSet;
 import java.util.Set;
+
+import utils.NetworkUtils;
 
 public class ClientHandler implements Runnable {
 
@@ -17,8 +18,6 @@ public class ClientHandler implements Runnable {
     private BufferedReader in;
     private int clientId;
     private static Set<Client> clients = new HashSet<>();
-
-    private static final String MESSAGE_PATTERN = "CID:<clientId>|MSG:<message>";
 
     public ClientHandler(Socket socket, int clientId) {
         this.clientSocket = socket;
@@ -32,26 +31,34 @@ public class ClientHandler implements Runnable {
             out = new PrintWriter(clientSocket.getOutputStream(), true);
 
             // Enviar el ID al cliente
-            out.println("CID:" + clientId);
-            InetAddress clientAddress = clientSocket.getInetAddress();
-            int clientPort = clientSocket.getPort();
+            out.println(MessageHandler.packClientId(clientId));
 
             // Recibir el puerto UDP del cliente "UDP:<udpPort>"
             String udpPortPackage = in.readLine();
-            String value = udpPortPackage.split(":")[1];
-            int clientUdpPort = Integer.parseInt(value); 
-            System.out.println("Puerto UDP del CID:" + clientId + " " + clientAddress + ":" + clientUdpPort);
+            int clientUdpPort = MessageHandler.unpackPortUDP(udpPortPackage);
+
+            InetAddress clientAddress = clientSocket.getInetAddress();
+            int clientTcpPort = clientSocket.getPort();
+
+            System.out.println(
+                    "Nuevo CID:" + clientId + "|IP:" + clientAddress + "|TCP Port:" + clientTcpPort + "|UDP Port:"
+                            + clientUdpPort);
 
             synchronized (clients) {
-                clients.add(new Client(clientId, clientAddress, clientPort, clientUdpPort, out));
+                clients.add(new Client(clientId, clientAddress, clientTcpPort, clientUdpPort, out));
             }
 
-            String mensajeDelCliente;
-            while ((mensajeDelCliente = in.readLine()) != null) {
-                System.out.println("Mensaje recibido del cliente: " + clientId + ": "+ mensajeDelCliente);
-                String paquete = MESSAGE_PATTERN.replaceFirst("<clientId>", String.format("%05d", clientId)).replaceFirst("<message>", mensajeDelCliente);
+            String payloadFromClient;
+            while ((payloadFromClient = in.readLine()) != null) {
+                System.out.println(
+                        "Recibido CID:" + clientId + "|IP:" + clientAddress + "|TCP Port:" + clientTcpPort
+                                + "|UDP Port:"
+                                + clientUdpPort + "|payload: [" + payloadFromClient + "]");
+                String message = MessageHandler.packMessage(clientId, payloadFromClient);
                 synchronized (clients) {
-                    ClientHandler.broadcastMessage(paquete, clientAddress, clientPort);
+                    System.out.println("Enviando [" + message + "]");
+                    NetworkUtils.broadcastMessage(message, clients);
+                    System.out.println("");
                 }
             }
         } catch (IOException e) {
@@ -68,35 +75,18 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    private static void broadcastMessage(String message, InetAddress senderAddress, int senderPort) {
-        try (DatagramSocket udpSocket = new DatagramSocket()) {
-            udpSocket.setBroadcast(true);
-            byte[] buffer = message.getBytes();
-            
-            System.out.println("Propagando el mensaje '" + message + "' de " + senderAddress + ":" + senderPort);
-            for (Client client : clients) {
-                // Evita propagar el mensaje al autor, pero quizas sirva que lo reciba para sincronizar cosas.
-                //if (client.getClientPort() != senderPort) {
-                    DatagramPacket packet = new DatagramPacket(buffer, buffer.length, client.getClientAddress(), client.getClientUdpPort());
-                    udpSocket.send(packet);
-                //}
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static class Client {
+    public static class Client {
         private int id;
         private InetAddress clientAddress;
-        private int clientPort;
+        private int clientTcpPort;
         private int clientUdpPort;
         private PrintWriter writer;
 
-        public Client(int id, InetAddress clientAddress, int clientPort, int clientUdpPort, PrintWriter writer) {
+        public Client(int id, InetAddress clientAddress, int clientTcpPort, int clientUdpPort,
+                PrintWriter writer) {
             this.id = id;
             this.clientAddress = clientAddress;
-            this.clientPort = clientPort;
+            this.clientTcpPort = clientTcpPort;
             this.clientUdpPort = clientUdpPort;
             this.writer = writer;
         }
@@ -109,8 +99,8 @@ public class ClientHandler implements Runnable {
             return clientAddress;
         }
 
-        public int getClientPort() {
-            return clientPort;
+        public int getClientTcpPort() {
+            return clientTcpPort;
         }
 
         public int getClientUdpPort() {

@@ -1,11 +1,11 @@
 
-
 import client.ClientTCP;
 
 public class Client {
 
-    // Moverlo a un archivo de configuracion no versionado
-    private static final String SERVER_ADDRESS = "localhost"; // Cambia a la IP del servidor si no está en la misma máquina
+    // TODO Moverlo a un archivo de configuracion no versionado
+    // Cambia a la IP del servidor si no está en la misma máquina
+    private static final String SERVER_ADDRESS = "localhost";
     private static final int TCP_PORT = 12345;
 
     public static void main(String[] args) {

@@ -10,7 +10,7 @@ public class Server {
     private static final int TCP_PORT = 12345;
 
     private static final AtomicInteger clientIdCounter = new AtomicInteger(1);
-    
+
     public static void main(String[] args) {
         startServer();
     }
@@ -21,11 +21,11 @@ public class Server {
             while (true) {
                 Socket clientSocket = serverSocket.accept();
                 int clientId = clientIdCounter.getAndIncrement();
-                System.out.println("Cliente conectado (ID: " + clientId + "): " +
-                    clientSocket.getInetAddress() + ":" + clientSocket.getPort());
-            
-                Runnable clientTCPWatcher = new ClientHandler(clientSocket, clientId);
-                new Thread(clientTCPWatcher).start();
+                System.out.println("Cliente conectado (ID: " + clientId + "): "
+                        + clientSocket.getInetAddress() + ":" + clientSocket.getPort());
+
+                Runnable clientHandler = new ClientHandler(clientSocket, clientId);
+                new Thread(clientHandler).start();
             }
         } catch (IOException e) {
             e.printStackTrace();
