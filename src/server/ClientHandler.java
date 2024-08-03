@@ -9,6 +9,8 @@ import java.net.Socket;
 import java.util.HashSet;
 import java.util.Set;
 
+import messages.IncomeMessage;
+import messages.MessageHandler;
 import utils.NetworkUtils;
 
 public class ClientHandler implements Runnable {
@@ -31,10 +33,13 @@ public class ClientHandler implements Runnable {
             out = new PrintWriter(clientSocket.getOutputStream(), true);
 
             // Enviar el ID al cliente
-            out.println(MessageHandler.packClientId(clientId));
+            String clientIdPackage = MessageHandler.packMessage(clientId, "");
+            out.println(clientIdPackage);
+            System.out.println("Enviado ClientId package [" + clientIdPackage + "]");
 
             // Recibir el puerto UDP del cliente "UDP:<udpPort>"
             String udpPortPackage = in.readLine();
+            System.out.println("Recibido UDP port package [" + udpPortPackage + "]");
             int clientUdpPort = MessageHandler.unpackPortUDP(udpPortPackage);
 
             InetAddress clientAddress = clientSocket.getInetAddress();
@@ -52,12 +57,13 @@ public class ClientHandler implements Runnable {
             while ((payloadFromClient = in.readLine()) != null) {
                 System.out.println(
                         "Recibido CID:" + clientId + "|IP:" + clientAddress + "|TCP Port:" + clientTcpPort
-                                + "|UDP Port:"
-                                + clientUdpPort + "|payload: [" + payloadFromClient + "]");
-                String message = MessageHandler.packMessage(clientId, payloadFromClient);
+                                + "|UDP Port:" + clientUdpPort + "|payload:[" + payloadFromClient + "]");
+                IncomeMessage message = MessageHandler.parseMessage(payloadFromClient);
                 synchronized (clients) {
-                    System.out.println("Enviando [" + message + "]");
-                    NetworkUtils.broadcastMessage(message, clients);
+                    System.out.println("Enviando [" + message.getPayload().getContent() + "]");
+                    String packMessage = MessageHandler.packMessage(Integer.parseInt(message.getClientId()),
+                            message.getPayload().getContent());
+                    NetworkUtils.broadcastMessage(packMessage, clients);
                     System.out.println("");
                 }
             }

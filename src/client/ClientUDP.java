@@ -3,6 +3,9 @@ package client;
 import java.io.*;
 import java.net.*;
 
+import messages.IncomeMessage;
+import messages.MessageHandler;
+
 public class ClientUDP implements Runnable {
 
     private DatagramSocket udpSocket;
@@ -23,7 +26,10 @@ public class ClientUDP implements Runnable {
                 udpSocket.receive(packet);
                 String receivedMessage = new String(packet.getData(), 0, packet.getLength());
                 System.out.println("Recibido: " + receivedMessage);
-                MessageHandler.parseMessage(receivedMessage, clientId);
+                IncomeMessage incomeMessage = MessageHandler.parseMessage(receivedMessage);
+                if (clientId == Integer.parseInt(incomeMessage.getClientId())) {
+                    System.out.println("Soy yo mismo");
+                }
                 System.out.println("");
             }
 
