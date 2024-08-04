@@ -42,7 +42,7 @@ public class ClientTCP implements Runnable {
             Runnable clientUDP = new ClientUDP(udpSocket, clientId);
             new Thread(clientUDP).start();
 
-            Runnable clientTCPReader = new ClientTCPReader(entrada);
+            Runnable clientTCPReader = new ClientTCPReader(socket, entrada);
             new Thread(clientTCPReader).start();
 
             String payload;

@@ -33,7 +33,7 @@ public class ClientUDP implements Runnable {
                 System.out.println("");
             }
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

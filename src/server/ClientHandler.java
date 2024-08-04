@@ -34,17 +34,15 @@ public class ClientHandler implements Runnable {
             // Enviar el ID al cliente
             String clientIdPackage = MessageHandler.packMessage(clientId, "");
             out.println(clientIdPackage);
-            System.out.println("Enviado ClientId package [" + clientIdPackage + "]");
+            System.out.println("Handshake - Enviado  [" + clientIdPackage + "]");
 
             // Recibir el puerto UDP del cliente "UDP:<udpPort>"
             String udpPortPackage = in.readLine();
-            System.out.println("Recibido UDP port package [" + udpPortPackage + "]");
+            System.out.println("Handshake - Recibido [" + udpPortPackage + "]");
             int clientUdpPort = MessageHandler.unpackPortUDP(udpPortPackage);
 
             synchronized (clients) {
-                Client client = new Client(clientId, clientSocket, clientUdpPort, out);
-                System.out.println("Nuevo Cliente:" + client);
-                clients.add(client);
+                clients.add(new Client(clientId, clientSocket, clientUdpPort, out));
             }
 
             String messageFromClient;
@@ -60,6 +58,7 @@ public class ClientHandler implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
+            System.out.println("El cliente [" + clientId + "] se fue");
             try {
                 clientSocket.close();
             } catch (IOException e) {
@@ -109,7 +108,7 @@ public class ClientHandler implements Runnable {
 
         @Override
         public String toString() {
-            return "CID:" + id + "|IP:" + clientAddress + "|TCP Port:" + clientTcpPort + "|UDP Port:" + clientUdpPort;
+            return "CID:" + id + "|IP:" + clientAddress + "|TCP:" + clientTcpPort + "|UDP:" + clientUdpPort;
         }
     }
 }
