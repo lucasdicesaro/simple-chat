@@ -12,15 +12,11 @@ import java.util.logging.Logger;
  * @see https://jackiexie.com/2015/07/15/network-discovery-using-udp-broadcast-java/
  */
 public class DiscoveryServer implements Runnable {
-	// how much data to accept from a broadcast client.
+
 	private static final Logger logger;
 	private DatagramSocket socket;
 
-	/**
-	 * Set an environment variable for logging format. This is for 1-line messages.
-	 */
 	static {
-		// %1=datetime %2=methodname %3=loggername %4=level %5=message
 		System.setProperty("java.util.logging.SimpleFormatter.format",
 				"%1$tF %1$tT %3$s %4$-7s %5$s%n");
 		logger = Logger.getLogger("DiscoveryServer");
@@ -31,7 +27,7 @@ public class DiscoveryServer implements Runnable {
 		try {
 			// Keep a socket open to listen to all the UDP trafic that is destined for this
 			// port
-			socket = new DatagramSocket(8888, InetAddress.getByName("0.0.0.0"));
+			socket = new DatagramSocket(DiscoveryCommon.DISCOVERY_PORT, InetAddress.getByName("0.0.0.0"));
 			socket.setBroadcast(true);
 
 			while (true) {
@@ -43,14 +39,13 @@ public class DiscoveryServer implements Runnable {
 				socket.receive(packet);
 
 				// Packet received
-				logger.info(">>>Discovery packet received from: "
-						+ packet.getAddress().getHostAddress());
+				logger.info(">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
 				logger.info(">>>Packet received; data: " + new String(packet.getData()));
 
 				// See if the packet holds the right command (message)
 				String message = new String(packet.getData()).trim();
-				if (message.equals("DISCOVER_SERVER_REQUEST")) {
-					byte[] sendData = "DISCOVER_SERVER_RESPONSE".getBytes();
+				if (message.equals(DiscoveryCommon.DISCOVER_SERVER_REQUEST)) {
+					byte[] sendData = DiscoveryCommon.DISCOVER_SERVER_RESPONSE.getBytes();
 
 					// Send a response
 					DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, packet.getAddress(),

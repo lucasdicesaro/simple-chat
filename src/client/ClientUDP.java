@@ -13,7 +13,6 @@ public class ClientUDP implements Runnable {
     private int clientId;
 
     static {
-        // %1=datetime %2=methodname %3=loggername %4=level %5=message
         System.setProperty("java.util.logging.SimpleFormatter.format",
                 "%1$tF %1$tT %3$s %4$-7s %5$s%n");
         logger = Logger.getLogger("ClientUDP");
