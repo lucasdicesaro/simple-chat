@@ -43,81 +43,41 @@ public class DiscoveryServer implements Runnable {
 
 	@Override
 	public void run() {
-		// quit if we get this many consecutive receive errors.
-		// reset the counter after successfully receiving a packet.
-		final int max_errors = 5;
-		int errorCount = 0;
-
-		// this is weak - address could be null or wrong address
-		final String MY_IP = NetworkUtil.getMyAddress().getHostAddress();
-		logger.info("My IP Address " + MY_IP);
-		// Keep a socket open to listen to all UDP trafic that is
-		// destined for this port.
 		try {
-			// 0.0.0.0 means all IPv4 address on this machine.
-			// Probably the best address to listen on.
-			InetAddress addr = InetAddress.getByName("0.0.0.0");
-			// InetAddress addr = NetworkUtil.getMyAddress();
-			socket = new DatagramSocket(DISCOVERY_PORT, addr);
-			// set flag to enable receipt of broadcast packets
+			// Keep a socket open to listen to all the UDP trafic that is destined for this
+			// port
+			socket = new DatagramSocket(8888, InetAddress.getByName("0.0.0.0"));
 			socket.setBroadcast(true);
-		} catch (Exception ex) {
-			String msg = "Could not create UDP socket on port " + DISCOVERY_PORT;
-			logger.log(Level.SEVERE, msg);
-			System.err.println(msg); // delete this after testing (redundant)
-			return;
-		}
 
-		System.out.printf("Server listening on port %d\n", DISCOVERY_PORT);
+			while (true) {
+				System.out.println(getClass().getName() + ">>>Ready to receive broadcast packets!");
 
-		while (true) {
-			// Receive a packet
-			byte[] recvBuf = new byte[MAX_PACKET_SIZE];
-			DatagramPacket packet = new DatagramPacket(recvBuf, recvBuf.length);
-			try {
-				// wait for a packet
+				// Receive a packet
+				byte[] recvBuf = new byte[15000];
+				DatagramPacket packet = new DatagramPacket(recvBuf, recvBuf.length);
 				socket.receive(packet);
-			} catch (IOException ioe) {
-				logger.log(Level.SEVERE, ioe.getMessage(), ioe);
-				// this is to avoid infinite loops when exception is raised.
-				errorCount++;
-				if (errorCount >= max_errors)
-					return;
-				// try again
-				continue;
-			}
 
-			// Packet received
-			errorCount = 0; // reset error counter
-			InetAddress clientAddress = packet.getAddress();
-			int clientPort = packet.getPort();
+				// Packet received
+				System.out.println(getClass().getName() + ">>>Discovery packet received from: "
+						+ packet.getAddress().getHostAddress());
+				System.out.println(getClass().getName() + ">>>Packet received; data: " + new String(packet.getData()));
 
-			logger.info(String.format("Packet received from %s:%d",
-					clientAddress.getHostAddress(), clientPort));
+				// See if the packet holds the right command (message)
+				String message = new String(packet.getData()).trim();
+				if (message.equals("DISCOVER_FUIFSERVER_REQUEST")) {
+					byte[] sendData = "DISCOVER_FUIFSERVER_RESPONSE".getBytes();
 
-			logger.info("Received data: " + new String(packet.getData()));
-
-			// See if the packet holds the correct signature string
-			String message = new String(packet.getData()).trim();
-			if (message.startsWith(DISCOVERY_REQUEST)) {
-				String reply = DISCOVERY_REPLY + MY_IP;
-				byte[] sendData = reply.getBytes();
-
-				// Send the response
-				DatagramPacket sendPacket = new DatagramPacket(sendData,
-						sendData.length, clientAddress, clientPort);
-				try {
+					// Send a response
+					DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, packet.getAddress(),
+							packet.getPort());
 					socket.send(sendPacket);
-					logger.info(String.format("Reply sent to %s:%d",
-							clientAddress.getHostAddress(), clientPort));
-				} catch (IOException ioe) {
-					logger.log(Level.SEVERE, "IOException sending service reply", ioe);
+
+					System.out.println(
+							getClass().getName() + ">>>Sent packet to: " + sendPacket.getAddress().getHostAddress());
 				}
-			} else {
-				logger.info(String.format("Packet from %s:%d not a discovery packet",
-						clientAddress.getHostAddress(), clientPort));
 			}
+		} catch (IOException ex) {
+			Logger.getLogger(DiscoveryServer.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
-
 }
