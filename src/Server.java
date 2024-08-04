@@ -1,11 +1,6 @@
 
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
-import server.ClientHandler;
 import server.DiscoveryServer;
 import server.ServerTCP;
 
@@ -25,7 +20,10 @@ public class Server {
     }
 
     private static void startServers() {
-        new Thread(new ServerTCP()).start();
+        logger.info("Servidor-Discovery iniciado...");
         new Thread(new DiscoveryServer()).start();
+
+        logger.info("Servidor TCP iniciado...");
+        new Thread(new ServerTCP()).start();
     }
 }

@@ -33,13 +33,17 @@ public class ClientTCPReader implements Runnable {
                 // Por ahora el Servidor no enviara mensajes TCP al cliente.
             }
         } catch (SocketException e) {
-            logger.warning("Socket cerrado");
             if (!socket.isClosed()) {
+                logger.warning("El servidor se ha desconectado. Saliendo...");
                 try {
                     socket.close();
+                    System.exit(-1);
                 } catch (IOException ioe) {
                     ioe.printStackTrace();
                 }
+            } else {
+                logger.warning("Socket cerrado - Proceso interrumpido por el cliente. Saliendo...");
+                System.exit(-1);
             }
         } catch (IOException e) {
             e.printStackTrace();

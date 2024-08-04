@@ -28,8 +28,6 @@ public class DiscoveryServer implements Runnable {
 
 	@Override
 	public void run() {
-		logger.info("Servidor UDP para Server-Discovery iniciado...");
-
 		try {
 			// Keep a socket open to listen to all the UDP trafic that is destined for this
 			// port
@@ -37,7 +35,7 @@ public class DiscoveryServer implements Runnable {
 			socket.setBroadcast(true);
 
 			while (true) {
-				logger.info(getClass().getName() + ">>>Ready to receive broadcast packets!");
+				logger.info(">>>Ready to receive broadcast packets!");
 
 				// Receive a packet
 				byte[] recvBuf = new byte[15000];
@@ -45,22 +43,21 @@ public class DiscoveryServer implements Runnable {
 				socket.receive(packet);
 
 				// Packet received
-				logger.info(getClass().getName() + ">>>Discovery packet received from: "
+				logger.info(">>>Discovery packet received from: "
 						+ packet.getAddress().getHostAddress());
-				logger.info(getClass().getName() + ">>>Packet received; data: " + new String(packet.getData()));
+				logger.info(">>>Packet received; data: " + new String(packet.getData()));
 
 				// See if the packet holds the right command (message)
 				String message = new String(packet.getData()).trim();
-				if (message.equals("DISCOVER_FUIFSERVER_REQUEST")) {
-					byte[] sendData = "DISCOVER_FUIFSERVER_RESPONSE".getBytes();
+				if (message.equals("DISCOVER_SERVER_REQUEST")) {
+					byte[] sendData = "DISCOVER_SERVER_RESPONSE".getBytes();
 
 					// Send a response
 					DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, packet.getAddress(),
 							packet.getPort());
 					socket.send(sendPacket);
 
-					logger.info(
-							getClass().getName() + ">>>Sent packet to: " + sendPacket.getAddress().getHostAddress());
+					logger.info(">>>Sent packet to: " + sendPacket.getAddress().getHostAddress());
 				}
 			}
 		} catch (IOException ex) {

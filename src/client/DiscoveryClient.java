@@ -39,19 +39,19 @@ public class DiscoveryClient implements Callable<String> {
 			DatagramSocket c = new DatagramSocket();
 			c.setBroadcast(true);
 
-			byte[] sendData = "DISCOVER_FUIFSERVER_REQUEST".getBytes();
+			byte[] sendData = "DISCOVER_SERVER_REQUEST".getBytes();
 
 			// Try the 255.255.255.255 first
 			try {
 				DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length,
 						InetAddress.getByName("255.255.255.255"), 8888);
 				c.send(sendPacket);
-				logger.info(getClass().getName() + ">>> Request packet sent to: 255.255.255.255 (DEFAULT)");
+				logger.info(">>> Request packet sent to: 255.255.255.255 (DEFAULT)");
 			} catch (Exception e) {
 			}
 
 			// Broadcast the message over all the network interfaces
-			Enumeration interfaces = NetworkInterface.getNetworkInterfaces();
+			Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
 			while (interfaces.hasMoreElements()) {
 				NetworkInterface networkInterface = (NetworkInterface) interfaces.nextElement();
 
@@ -72,13 +72,12 @@ public class DiscoveryClient implements Callable<String> {
 					} catch (Exception e) {
 					}
 
-					logger.info(getClass().getName() + ">>> Request packet sent to: "
+					logger.info(">>> Request packet sent to: "
 							+ broadcast.getHostAddress() + "; Interface: " + networkInterface.getDisplayName());
 				}
 			}
 
-			logger.info(
-					getClass().getName() + ">>> Done looping over all network interfaces. Now waiting for a reply!");
+			logger.info(">>> Done looping over all network interfaces. Now waiting for a reply!");
 
 			// Wait for a response
 			byte[] recvBuf = new byte[15000];
@@ -86,13 +85,12 @@ public class DiscoveryClient implements Callable<String> {
 			c.receive(receivePacket);
 
 			// We have a response
-			logger.info(getClass().getName() + ">>> Broadcast response from server: "
+			logger.info(">>> Broadcast response from server: "
 					+ receivePacket.getAddress().getHostAddress());
 
 			// Check if the message is correct
 			String message = new String(receivePacket.getData()).trim();
-			if (message.equals("DISCOVER_FUIFSERVER_RESPONSE")) {
-				// DO SOMETHING WITH THE SERVER'S IP (for example, store it in your controller)
+			if (message.equals("DISCOVER_SERVER_RESPONSE")) {
 				serverIp = receivePacket.getAddress().getHostAddress();
 			}
 
