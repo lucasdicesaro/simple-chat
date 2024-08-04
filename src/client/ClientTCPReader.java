@@ -14,9 +14,9 @@ public class ClientTCPReader implements Runnable {
     @Override
     public void run() {
         try {
-            String mensajeDelServidor;
-            while ((mensajeDelServidor = in.readLine()) != null) {
-                System.out.println("\nMensaje del servidor: " + mensajeDelServidor);
+            String tcpMessageFromServer;
+            while ((tcpMessageFromServer = in.readLine()) != null) {
+                System.out.println("\nMensaje del servidor: " + tcpMessageFromServer);
                 // Por ahora el Servidor no enviara mensajes TCP al cliente.
             }
         } catch (IOException e) {

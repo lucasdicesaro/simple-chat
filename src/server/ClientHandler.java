@@ -8,8 +8,9 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.StringTokenizer;
 
-import messages.IncomeMessage;
+import messages.MessageContainer;
 import messages.MessageHandler;
 import utils.NetworkUtils;
 
@@ -42,29 +43,20 @@ public class ClientHandler implements Runnable {
             System.out.println("Recibido UDP port package [" + udpPortPackage + "]");
             int clientUdpPort = MessageHandler.unpackPortUDP(udpPortPackage);
 
-            InetAddress clientAddress = clientSocket.getInetAddress();
-            int clientTcpPort = clientSocket.getPort();
-
-            System.out.println(
-                    "Nuevo CID:" + clientId + "|IP:" + clientAddress + "|TCP Port:" + clientTcpPort + "|UDP Port:"
-                            + clientUdpPort);
-
             synchronized (clients) {
-                clients.add(new Client(clientId, clientAddress, clientTcpPort, clientUdpPort, out));
+                Client client = new Client(clientId, clientSocket, clientUdpPort, out);
+                System.out.println("Nuevo Cliente:" + client);
+                clients.add(client);
             }
 
-            String payloadFromClient;
-            while ((payloadFromClient = in.readLine()) != null) {
-                System.out.println(
-                        "Recibido CID:" + clientId + "|IP:" + clientAddress + "|TCP Port:" + clientTcpPort
-                                + "|UDP Port:" + clientUdpPort + "|payload:[" + payloadFromClient + "]");
-                IncomeMessage message = MessageHandler.parseMessage(payloadFromClient);
+            String messageFromClient;
+            while ((messageFromClient = in.readLine()) != null) {
+                System.out.println("Recibido [" + messageFromClient + "]");
+                MessageContainer messageContainer = MessageHandler.parseMessage(messageFromClient);
                 synchronized (clients) {
-                    System.out.println("Enviando [" + message.getPayload().getContent() + "]");
-                    String packMessage = MessageHandler.packMessage(Integer.parseInt(message.getClientId()),
-                            message.getPayload().getContent());
-                    NetworkUtils.broadcastMessage(packMessage, clients);
-                    System.out.println("");
+                    String messagePackage = MessageHandler.packMessage(messageContainer);
+                    NetworkUtils.broadcastMessage(messagePackage, clients);
+                    System.out.println("Enviado  [" + messagePackage + "]\n");
                 }
             }
         } catch (IOException e) {
@@ -88,11 +80,11 @@ public class ClientHandler implements Runnable {
         private int clientUdpPort;
         private PrintWriter writer;
 
-        public Client(int id, InetAddress clientAddress, int clientTcpPort, int clientUdpPort,
+        public Client(int id, Socket clientSocket, int clientUdpPort,
                 PrintWriter writer) {
             this.id = id;
-            this.clientAddress = clientAddress;
-            this.clientTcpPort = clientTcpPort;
+            this.clientAddress = clientSocket.getInetAddress();
+            this.clientTcpPort = clientSocket.getPort();
             this.clientUdpPort = clientUdpPort;
             this.writer = writer;
         }
@@ -115,6 +107,11 @@ public class ClientHandler implements Runnable {
 
         public PrintWriter getWriter() {
             return writer;
+        }
+
+        @Override
+        public String toString() {
+            return "CID:" + id + "|IP:" + clientAddress + "|TCP Port:" + clientTcpPort + "|UDP Port:" + clientUdpPort;
         }
     }
 }

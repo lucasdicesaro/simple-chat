@@ -3,7 +3,7 @@ package client;
 import java.io.*;
 import java.net.*;
 
-import messages.IncomeMessage;
+import messages.MessageContainer;
 import messages.MessageHandler;
 
 public class ClientUDP implements Runnable {
@@ -25,9 +25,9 @@ public class ClientUDP implements Runnable {
             while (true) {
                 udpSocket.receive(packet);
                 String receivedMessage = new String(packet.getData(), 0, packet.getLength());
-                System.out.println("Recibido: " + receivedMessage);
-                IncomeMessage incomeMessage = MessageHandler.parseMessage(receivedMessage);
-                if (clientId == Integer.parseInt(incomeMessage.getClientId())) {
+                System.out.println("Recibido [" + receivedMessage + "]");
+                MessageContainer messageContainer = MessageHandler.parseMessage(receivedMessage);
+                if (clientId == Integer.parseInt(messageContainer.getClientId())) {
                     System.out.println("Soy yo mismo");
                 }
                 System.out.println("");

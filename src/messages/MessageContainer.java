@@ -1,6 +1,6 @@
 package messages;
 
-public class IncomeMessage {
+public class MessageContainer {
     private String clientId;
     private Payload payload;
 
@@ -19,5 +19,4 @@ public class IncomeMessage {
     public void setPayload(Payload payload) {
         this.payload = payload;
     }
-
 }

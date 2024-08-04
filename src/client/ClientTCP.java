@@ -3,7 +3,7 @@ package client;
 import java.io.*;
 import java.net.*;
 
-import messages.IncomeMessage;
+import messages.MessageContainer;
 import messages.MessageHandler;
 
 public class ClientTCP implements Runnable {
@@ -28,18 +28,16 @@ public class ClientTCP implements Runnable {
             String clientIdPackage = entrada.readLine();
             System.out.println("Recibido ClientId package [" + clientIdPackage + "]");
 
-            IncomeMessage incomeMessage = MessageHandler.parseMessage(clientIdPackage);
-            System.out.println("ClientId asignado por el servidor: " + incomeMessage.getClientId());
+            MessageContainer messageContainer = MessageHandler.parseMessage(clientIdPackage);
+            System.out.println("ClientId asignado por el servidor: " + messageContainer.getClientId());
 
             // Enviar al servidor el puerto UDP asignado por el SO
             DatagramSocket udpSocket = new DatagramSocket();
-            int udpPort = udpSocket.getLocalPort();
-            System.out.println("Puerto UDP asignado por el SO: " + udpPort);
-            String udpPortPackage = MessageHandler.packUDPPort(udpPort);
+            String udpPortPackage = MessageHandler.packUDPPort(udpSocket.getLocalPort());
             salida.println(udpPortPackage);
             System.out.println("Enviado UDP port package [" + udpPortPackage + "]");
 
-            int clientId = Integer.parseInt(incomeMessage.getClientId());
+            int clientId = Integer.parseInt(messageContainer.getClientId());
 
             Runnable clientUDP = new ClientUDP(udpSocket, clientId);
             new Thread(clientUDP).start();
@@ -53,7 +51,7 @@ public class ClientTCP implements Runnable {
                 if (!payload.isBlank()) {
                     String message = MessageHandler.packMessage(clientId, payload);
                     salida.println(message);
-                    System.out.println("Enviado [" + message + "]");
+                    System.out.println("Enviado  [" + message + "]");
                 }
             }
 

@@ -19,16 +19,22 @@ public class MessageHandler {
         .replaceFirst("<payload>", payload);
   }
 
-  public static IncomeMessage parseMessage(String message) {
-    String[] tokens = message.split("\\|");
-    IncomeMessage incomeMessage = new IncomeMessage();
-    for (String token : tokens) {
-      parseToken(token, incomeMessage);
-    }
-    return incomeMessage;
+  public static String packMessage(MessageContainer messageContainer) {
+    return MESSAGE_PATTERN.replaceFirst("<clientId>", messageContainer.getClientId())
+        .replaceFirst("<payload>",
+            messageContainer.getPayload() != null ? messageContainer.getPayload().getContent() : "");
   }
 
-  public static void parseToken(String token, IncomeMessage incomeMessage) {
+  public static MessageContainer parseMessage(String message) {
+    String[] tokens = message.split("\\|");
+    MessageContainer messageContainer = new MessageContainer();
+    for (String token : tokens) {
+      parseToken(token, messageContainer);
+    }
+    return messageContainer;
+  }
+
+  public static void parseToken(String token, MessageContainer messageContainer) {
     String[] subtokens = token.split(":");
     if (subtokens.length < 2) {
       // Se espera que cada token tenga el formato <key>:<value>
@@ -38,19 +44,17 @@ public class MessageHandler {
     String key = subtokens[0];
     String value = subtokens[1];
     if ("CID".equals(key)) {
-      parseClientId(value, incomeMessage);
+      parseClientId(value, messageContainer);
     } else if ("PLD".equals(key)) {
-      parsePayload(value, incomeMessage);
+      parsePayload(value, messageContainer);
     }
   }
 
-  public static void parseClientId(String clientId, IncomeMessage incomeMessage) {
-    incomeMessage.setClientId(clientId);
-    System.out.println("Client ID: " + clientId);
+  public static void parseClientId(String clientId, MessageContainer messageContainer) {
+    messageContainer.setClientId(clientId);
   }
 
-  public static void parsePayload(String payload, IncomeMessage incomeMessage) {
-    System.out.println("Mensaje: [" + payload + "]");
-    incomeMessage.setPayload(new Payload(payload));
+  public static void parsePayload(String payload, MessageContainer messageContainer) {
+    messageContainer.setPayload(new Payload(payload));
   }
 }
