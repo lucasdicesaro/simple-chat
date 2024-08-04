@@ -16,4 +16,4 @@ This is a client-server Java application for LAN used for testing pursposes like
 
 ## Credits
 
-Thanks to [James Brucker](https://github.com/jbrucker) for sharing the [server-discovery](https://github.com/jbrucker/server-discovery) repo.
+Thanks to [jackiexie](https://jackiexie.com/about-me/) for sharing the [server-discovery](https://jackiexie.com/2015/07/15/network-discovery-using-udp-broadcast-java/) explanation and example.

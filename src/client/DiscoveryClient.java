@@ -12,8 +12,7 @@ import java.util.logging.Logger;
  * @see https://jackiexie.com/2015/07/15/network-discovery-using-udp-broadcast-java/
  */
 public class DiscoveryClient implements Callable<String> {
-	/** maximum time to wait for a reply, in milliseconds. */
-	private static final int TIMEOUT = 2000; // milliseonds
+
 	private static final Logger logger;
 
 	/* Set an environment variable for for 1-line log messages. */
@@ -22,30 +21,6 @@ public class DiscoveryClient implements Callable<String> {
 		System.setProperty("java.util.logging.SimpleFormatter.format",
 				"%1$tF %1$tT %3$s %4$-7s %5$s%n");
 		logger = Logger.getLogger("DiscoveryClient");
-	}
-
-	/**
-	 * Create a UDP socket on the service discovery broadcast port.
-	 * 
-	 * @return open DatagramSocket if successful
-	 * @throws RuntimeException
-	 *                          if cannot create the socket
-	 */
-	public DatagramSocket createSocket() {
-		// Create a Datagram (UDP) socket on any available port
-		DatagramSocket socket = null;
-		// Create a socket for sending UDP broadcast packets
-		try {
-			socket = new DatagramSocket();
-			socket.setBroadcast(true);
-			// use a timeout and resend broadcasts instead of waiting forever
-			socket.setSoTimeout(TIMEOUT);
-		} catch (SocketException sex) {
-			logger.severe("SocketException creating broadcast socket: "
-					+ sex.getMessage());
-			throw new RuntimeException(sex);
-		}
-		return socket;
 	}
 
 	/**

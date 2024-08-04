@@ -68,7 +68,7 @@ public class ClientHandler implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            logger.info("El cliente [" + clientId + "] se fue");
+            logger.info("El cliente [" + clientId + "] se ha desconectado");
             try {
                 clientSocket.close();
             } catch (IOException e) {
