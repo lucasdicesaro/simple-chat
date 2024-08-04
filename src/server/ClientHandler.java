@@ -8,8 +8,6 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.StringTokenizer;
-
 import messages.MessageContainer;
 import messages.MessageHandler;
 import utils.NetworkUtils;
