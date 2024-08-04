@@ -1,15 +1,23 @@
 package client;
 
-import java.io.*;
 import java.net.*;
+import java.util.logging.Logger;
 
 import messages.MessageContainer;
 import messages.MessageHandler;
 
 public class ClientUDP implements Runnable {
 
+    private static final Logger logger;
     private DatagramSocket udpSocket;
     private int clientId;
+
+    static {
+        // %1=datetime %2=methodname %3=loggername %4=level %5=message
+        System.setProperty("java.util.logging.SimpleFormatter.format",
+                "%1$tF %1$tT %3$s %4$-7s %5$s%n");
+        logger = Logger.getLogger("ClientUDP");
+    }
 
     public ClientUDP(DatagramSocket udpSocket, int clientId) {
         this.udpSocket = udpSocket;
@@ -25,12 +33,12 @@ public class ClientUDP implements Runnable {
             while (true) {
                 udpSocket.receive(packet);
                 String receivedMessage = new String(packet.getData(), 0, packet.getLength());
-                System.out.println("Recibido [" + receivedMessage + "]");
+                logger.info("Recibido [" + receivedMessage + "]");
                 MessageContainer messageContainer = MessageHandler.parseMessage(receivedMessage);
                 if (clientId == Integer.parseInt(messageContainer.getClientId())) {
-                    System.out.println("Soy yo mismo");
+                    logger.info("Soy yo mismo");
                 }
-                System.out.println("");
+                logger.info("");
             }
 
         } catch (Exception e) {

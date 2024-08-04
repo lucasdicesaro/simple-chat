@@ -4,11 +4,20 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.logging.Logger;
 
 public class ClientTCPReader implements Runnable {
 
+    private static final Logger logger;
     private Socket socket;
     private BufferedReader in;
+
+    static {
+        // %1=datetime %2=methodname %3=loggername %4=level %5=message
+        System.setProperty("java.util.logging.SimpleFormatter.format",
+                "%1$tF %1$tT %3$s %4$-7s %5$s%n");
+        logger = Logger.getLogger("ClientTCPReader");
+    }
 
     public ClientTCPReader(Socket socket, BufferedReader in) {
         this.socket = socket;
@@ -20,11 +29,11 @@ public class ClientTCPReader implements Runnable {
         try {
             String tcpMessageFromServer;
             while ((tcpMessageFromServer = in.readLine()) != null) {
-                System.out.println("\nMensaje del servidor: " + tcpMessageFromServer);
+                logger.info("\nMensaje del servidor: " + tcpMessageFromServer);
                 // Por ahora el Servidor no enviara mensajes TCP al cliente.
             }
         } catch (SocketException e) {
-            System.out.println("Socket cerrado");
+            logger.warning("Socket cerrado");
             if (!socket.isClosed()) {
                 try {
                     socket.close();

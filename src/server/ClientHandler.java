@@ -8,17 +8,27 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
+
 import messages.MessageContainer;
 import messages.MessageHandler;
 import utils.NetworkUtils;
 
 public class ClientHandler implements Runnable {
 
+    private static final Logger logger;
     private Socket clientSocket;
     private PrintWriter out;
     private BufferedReader in;
     private int clientId;
     private static Set<Client> clients = new HashSet<>();
+
+    static {
+        // %1=datetime %2=methodname %3=loggername %4=level %5=message
+        System.setProperty("java.util.logging.SimpleFormatter.format",
+                "%1$tF %1$tT %3$s %4$-7s %5$s%n");
+        logger = Logger.getLogger("ClientHandler");
+    }
 
     public ClientHandler(Socket socket, int clientId) {
         this.clientSocket = socket;
@@ -34,11 +44,11 @@ public class ClientHandler implements Runnable {
             // Enviar el ID al cliente
             String clientIdPackage = MessageHandler.packMessage(clientId, "");
             out.println(clientIdPackage);
-            System.out.println("Handshake - Enviado  [" + clientIdPackage + "]");
+            logger.info("Handshake - Enviado  [" + clientIdPackage + "]");
 
             // Recibir el puerto UDP del cliente "UDP:<udpPort>"
             String udpPortPackage = in.readLine();
-            System.out.println("Handshake - Recibido [" + udpPortPackage + "]");
+            logger.info("Handshake - Recibido [" + udpPortPackage + "]");
             int clientUdpPort = MessageHandler.unpackPortUDP(udpPortPackage);
 
             synchronized (clients) {
@@ -47,18 +57,18 @@ public class ClientHandler implements Runnable {
 
             String messageFromClient;
             while ((messageFromClient = in.readLine()) != null) {
-                System.out.println("Recibido [" + messageFromClient + "]");
+                logger.info("Recibido [" + messageFromClient + "]");
                 MessageContainer messageContainer = MessageHandler.parseMessage(messageFromClient);
                 synchronized (clients) {
                     String messagePackage = MessageHandler.packMessage(messageContainer);
                     NetworkUtils.broadcastMessage(messagePackage, clients);
-                    System.out.println("Enviado  [" + messagePackage + "]\n");
+                    logger.info("Enviado  [" + messagePackage + "]\n");
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            System.out.println("El cliente [" + clientId + "] se fue");
+            logger.info("El cliente [" + clientId + "] se fue");
             try {
                 clientSocket.close();
             } catch (IOException e) {

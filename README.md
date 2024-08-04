@@ -13,3 +13,7 @@ This is a client-server Java application for LAN used for testing pursposes like
 1. Start the server.
 2. Start one or N clients and start chatting.
 
+
+## Credits
+
+Thanks to [James Brucker](https://github.com/jbrucker) for sharing the [server-discovery](https://github.com/jbrucker/server-discovery) repo.

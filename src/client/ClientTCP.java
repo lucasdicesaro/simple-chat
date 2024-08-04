@@ -2,14 +2,23 @@ package client;
 
 import java.io.*;
 import java.net.*;
+import java.util.logging.Logger;
 
 import messages.MessageContainer;
 import messages.MessageHandler;
 
 public class ClientTCP implements Runnable {
 
+    private static final Logger logger;
     private String serverAddress;
     private int tcpPort;
+
+    static {
+        // %1=datetime %2=methodname %3=loggername %4=level %5=message
+        System.setProperty("java.util.logging.SimpleFormatter.format",
+                "%1$tF %1$tT %3$s %4$-7s %5$s%n");
+        logger = Logger.getLogger("ClientTCP");
+    }
 
     public ClientTCP(String serverAddress, int tcpPort) {
         this.serverAddress = serverAddress;
@@ -26,16 +35,16 @@ public class ClientTCP implements Runnable {
 
             // Leer el ClientId asignado por el servidor
             String clientIdPackage = entrada.readLine();
-            System.out.println("Recibido ClientId package [" + clientIdPackage + "]");
+            logger.info("Recibido ClientId package [" + clientIdPackage + "]");
 
             MessageContainer messageContainer = MessageHandler.parseMessage(clientIdPackage);
-            System.out.println("ClientId asignado por el servidor: " + messageContainer.getClientId());
+            logger.info("ClientId asignado por el servidor: " + messageContainer.getClientId());
 
             // Enviar al servidor el puerto UDP asignado por el SO
             DatagramSocket udpSocket = new DatagramSocket();
             String udpPortPackage = MessageHandler.packUDPPort(udpSocket.getLocalPort());
             salida.println(udpPortPackage);
-            System.out.println("Enviado UDP port package [" + udpPortPackage + "]");
+            logger.info("Enviado UDP port package [" + udpPortPackage + "]");
 
             int clientId = Integer.parseInt(messageContainer.getClientId());
 
@@ -46,12 +55,11 @@ public class ClientTCP implements Runnable {
             new Thread(clientTCPReader).start();
 
             String payload;
-            System.out.print("> ");
             while ((payload = teclado.readLine()) != null) {
                 if (!payload.isBlank()) {
                     String message = MessageHandler.packMessage(clientId, payload);
                     salida.println(message);
-                    System.out.println("Enviado  [" + message + "]");
+                    logger.info("Enviado  [" + message + "]");
                 }
             }
 
