@@ -7,14 +7,11 @@ import java.util.concurrent.*; // For Callable, ExecutorServer, Executors, Futur
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static server.DiscoveryConfig.*;
-
 /**
  * 
  * @see https://jackiexie.com/2015/07/15/network-discovery-using-udp-broadcast-java/
  */
 public class DiscoveryClient implements Callable<String> {
-	private static final int MAX_PACKET_SIZE = 2048;
 	/** maximum time to wait for a reply, in milliseconds. */
 	private static final int TIMEOUT = 2000; // milliseonds
 	private static final Logger logger;
@@ -74,7 +71,7 @@ public class DiscoveryClient implements Callable<String> {
 				DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length,
 						InetAddress.getByName("255.255.255.255"), 8888);
 				c.send(sendPacket);
-				System.out.println(getClass().getName() + ">>> Request packet sent to: 255.255.255.255 (DEFAULT)");
+				logger.info(getClass().getName() + ">>> Request packet sent to: 255.255.255.255 (DEFAULT)");
 			} catch (Exception e) {
 			}
 
@@ -100,12 +97,12 @@ public class DiscoveryClient implements Callable<String> {
 					} catch (Exception e) {
 					}
 
-					System.out.println(getClass().getName() + ">>> Request packet sent to: "
+					logger.info(getClass().getName() + ">>> Request packet sent to: "
 							+ broadcast.getHostAddress() + "; Interface: " + networkInterface.getDisplayName());
 				}
 			}
 
-			System.out.println(
+			logger.info(
 					getClass().getName() + ">>> Done looping over all network interfaces. Now waiting for a reply!");
 
 			// Wait for a response
@@ -114,7 +111,7 @@ public class DiscoveryClient implements Callable<String> {
 			c.receive(receivePacket);
 
 			// We have a response
-			System.out.println(getClass().getName() + ">>> Broadcast response from server: "
+			logger.info(getClass().getName() + ">>> Broadcast response from server: "
 					+ receivePacket.getAddress().getHostAddress());
 
 			// Check if the message is correct

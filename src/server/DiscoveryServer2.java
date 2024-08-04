@@ -31,6 +31,8 @@ public class DiscoveryServer implements Runnable {
 
 	@Override
 	public void run() {
+		logger.info("Servidor UDP para Server-Discovery iniciado...");
+
 		try {
 			// Keep a socket open to listen to all the UDP trafic that is destined for this
 			// port

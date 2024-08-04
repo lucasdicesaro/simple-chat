@@ -21,7 +21,6 @@ public class ServerTCP implements Runnable {
 
     @Override
     public void run() {
-        System.out.println("Servidor TCP iniciado...");
         logger.info("Servidor TCP iniciado...");
         try (ServerSocket serverSocket = new ServerSocket(TCP_PORT)) {
             while (true) {
