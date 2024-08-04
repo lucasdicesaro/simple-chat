@@ -7,12 +7,11 @@ import java.util.logging.Logger;
 
 import server.ClientHandler;
 import server.DiscoveryServer;
+import server.ServerTCP;
 
 public class Server {
 
     private static final Logger logger;
-    private static final int TCP_PORT = 12345;
-    private static final AtomicInteger clientIdCounter = new AtomicInteger(1);
 
     static {
         // %1=datetime %2=methodname %3=loggername %4=level %5=message
@@ -26,24 +25,7 @@ public class Server {
     }
 
     private static void startServers() {
-
-        logger.info("Servidor UDP para Server-Discovery iniciado...");
-        DiscoveryServer server = new DiscoveryServer();
-        server.run();
-
-        logger.info("Servidor TCP iniciado...");
-        try (ServerSocket serverSocket = new ServerSocket(TCP_PORT)) {
-            while (true) {
-                Socket clientSocket = serverSocket.accept();
-                int clientId = clientIdCounter.getAndIncrement();
-                logger.info("Cliente conectado (ID: " + clientId + "): "
-                        + clientSocket.getInetAddress() + ":" + clientSocket.getPort());
-
-                Runnable clientHandler = new ClientHandler(clientSocket, clientId);
-                new Thread(clientHandler).start();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        new Thread(new ServerTCP()).start();
+        new Thread(new DiscoveryServer()).start();
     }
 }
