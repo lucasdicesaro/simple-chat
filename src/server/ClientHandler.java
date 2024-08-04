@@ -75,6 +75,10 @@ public class ClientHandler implements Runnable {
             }
             synchronized (clients) {
                 clients.removeIf(c -> c.getId() == clientId);
+                // Se informa al resto de los clientes que clientId se ha desconectado
+                String messagePackage = MessageHandler.packClientDown(clientId);
+                NetworkUtils.broadcastMessage(messagePackage, clients);
+                logger.info("Enviado  [" + messagePackage + "]\n");
             }
         }
     }

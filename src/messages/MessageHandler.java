@@ -4,6 +4,7 @@ public class MessageHandler {
 
   private static final String UDP_PORT_MESSAGE_PATTERN = "UDP:<udpPort>";
   private static final String MESSAGE_PATTERN = "CID:<clientId>|PLD:<payload>";
+  private static final String CLIENT_DOWN_PATTERN = "CID:<clientId>|PLD:DWN";
 
   public static String packUDPPort(int udpPort) {
     return UDP_PORT_MESSAGE_PATTERN.replaceFirst("<udpPort>", String.valueOf(udpPort));
@@ -17,6 +18,10 @@ public class MessageHandler {
   public static String packMessage(int clientId, String payload) {
     return MESSAGE_PATTERN.replaceFirst("<clientId>", String.format("%05d", clientId))
         .replaceFirst("<payload>", payload);
+  }
+
+  public static String packClientDown(int clientId) {
+    return CLIENT_DOWN_PATTERN.replaceFirst("<clientId>", String.format("%05d", clientId));
   }
 
   public static String packMessage(MessageContainer messageContainer) {
