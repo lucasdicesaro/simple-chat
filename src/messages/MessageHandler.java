@@ -6,6 +6,17 @@ public class MessageHandler {
   private static final String MESSAGE_PATTERN = "CID:<clientId>|PLD:<payload>";
   private static final String CLIENT_DOWN_PATTERN = "CID:<clientId>|PLD:DWN";
 
+  // From client:
+  // "NOD:<id>|TYP:CHT|<mensage>" // Chat
+  // "NOD:<id>|TYP:ACT|MOV=U" // Movement UP
+  // "NOD:<id>|TYP:ACT|MOV=D"
+  // "NOD:<id>|TYP:ACT|MOV=L"
+  // "NOD:<id>|TYP:ACT|MOV=R"
+  //
+  // From server:
+  // Client list
+  // "NOD:<id>|TYP:LIST|[{CID:1,X:162,Y:23},{CID:2,X:62,Y:67},{CID:3,X:56,Y:91}]"
+
   public static String packUDPPort(int udpPort) {
     return UDP_PORT_MESSAGE_PATTERN.replaceFirst("<udpPort>", String.valueOf(udpPort));
   }
@@ -44,14 +55,22 @@ public class MessageHandler {
     if (subtokens.length < 2) {
       // Se espera que cada token tenga el formato <key>:<value>
       // Se ignora si no tiene ese formato.
+      System.out.println("Mensaje mal formado");
       return;
     }
+
     String key = subtokens[0];
     String value = subtokens[1];
-    if ("CID".equals(key)) {
-      parseClientId(value, messageContainer);
-    } else if ("PLD".equals(key)) {
-      parsePayload(value, messageContainer);
+
+    switch (key) {
+      case "CID":
+        parseClientId(value, messageContainer);
+        break;
+      case "PLD":
+        parsePayload(value, messageContainer);
+        break;
+      default:
+        throw new IllegalArgumentException("Tipo de mensaje invalido: [" + key + "]");
     }
   }
 
