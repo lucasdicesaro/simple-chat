@@ -10,7 +10,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import messages.MessageContainer;
 import messages.MessageHandler;
 import utils.NetworkUtils;
 
@@ -57,11 +56,9 @@ public class ClientHandler implements Runnable {
             String messageFromClient;
             while ((messageFromClient = in.readLine()) != null) {
                 logger.info("Recibido [" + messageFromClient + "]");
-                MessageContainer messageContainer = MessageHandler.parseMessage(messageFromClient);
                 synchronized (clients) {
-                    String messagePackage = MessageHandler.packMessage(messageContainer);
-                    NetworkUtils.broadcastMessage(messagePackage, clients);
-                    logger.info("Enviado  [" + messagePackage + "]\n");
+                    NetworkUtils.broadcastMessage(messageFromClient, clients);
+                    logger.info("Enviado  [" + messageFromClient + "]\n");
                 }
             }
         } catch (IOException e) {

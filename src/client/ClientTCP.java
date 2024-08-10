@@ -45,9 +45,7 @@ public class ClientTCP implements Runnable {
             salida.println(udpPortPackage);
             logger.info("Enviado UDP port package [" + udpPortPackage + "]");
 
-            int clientId = Integer.parseInt(messageContainer.getClientId());
-
-            Runnable clientUDP = new ClientUDP(udpSocket, clientId);
+            Runnable clientUDP = new ClientUDP(udpSocket);
             new Thread(clientUDP).start();
 
             Runnable clientTCPReader = new ClientTCPReader(socket, entrada);
@@ -56,9 +54,8 @@ public class ClientTCP implements Runnable {
             String payload;
             while ((payload = teclado.readLine()) != null) {
                 if (!payload.isBlank()) {
-                    String message = MessageHandler.packMessage(clientId, payload);
-                    salida.println(message);
-                    logger.info("Enviado  [" + message + "]");
+                    salida.println(payload);
+                    logger.info("Enviado  [" + payload + "]");
                 }
             }
 

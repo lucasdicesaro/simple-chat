@@ -6,17 +6,6 @@ public class MessageHandler {
   private static final String MESSAGE_PATTERN = "CID:<clientId>|PLD:<payload>";
   private static final String CLIENT_DOWN_PATTERN = "CID:<clientId>|PLD:DWN";
 
-  // From client:
-  // "NOD:<id>|TYP:CHT|<mensage>" // Chat
-  // "NOD:<id>|TYP:ACT|MOV=U" // Movement UP
-  // "NOD:<id>|TYP:ACT|MOV=D"
-  // "NOD:<id>|TYP:ACT|MOV=L"
-  // "NOD:<id>|TYP:ACT|MOV=R"
-  //
-  // From server:
-  // Client list
-  // "NOD:<id>|TYP:LIST|[{CID:1,X:162,Y:23},{CID:2,X:62,Y:67},{CID:3,X:56,Y:91}]"
-
   public static String packUDPPort(int udpPort) {
     return UDP_PORT_MESSAGE_PATTERN.replaceFirst("<udpPort>", String.valueOf(udpPort));
   }
@@ -66,19 +55,13 @@ public class MessageHandler {
       case "CID":
         parseClientId(value, messageContainer);
         break;
-      case "PLD":
-        parsePayload(value, messageContainer);
-        break;
       default:
         throw new IllegalArgumentException("Tipo de mensaje invalido: [" + key + "]");
     }
   }
 
   public static void parseClientId(String clientId, MessageContainer messageContainer) {
+    System.out.println("Parseando CLIENT ID");
     messageContainer.setClientId(clientId);
-  }
-
-  public static void parsePayload(String payload, MessageContainer messageContainer) {
-    messageContainer.setPayload(new Payload(payload));
   }
 }

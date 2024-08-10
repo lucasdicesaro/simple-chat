@@ -3,14 +3,10 @@ package client;
 import java.net.*;
 import java.util.logging.Logger;
 
-import messages.MessageContainer;
-import messages.MessageHandler;
-
 public class ClientUDP implements Runnable {
 
     private static final Logger logger;
     private DatagramSocket udpSocket;
-    private int clientId;
 
     static {
         System.setProperty("java.util.logging.SimpleFormatter.format",
@@ -18,9 +14,8 @@ public class ClientUDP implements Runnable {
         logger = Logger.getLogger("ClientUDP");
     }
 
-    public ClientUDP(DatagramSocket udpSocket, int clientId) {
+    public ClientUDP(DatagramSocket udpSocket) {
         this.udpSocket = udpSocket;
-        this.clientId = clientId;
     }
 
     @Override
@@ -33,10 +28,6 @@ public class ClientUDP implements Runnable {
                 udpSocket.receive(packet);
                 String receivedMessage = new String(packet.getData(), 0, packet.getLength());
                 logger.info("Recibido [" + receivedMessage + "]");
-                MessageContainer messageContainer = MessageHandler.parseMessage(receivedMessage);
-                if (clientId == Integer.parseInt(messageContainer.getClientId())) {
-                    logger.info("Soy yo mismo");
-                }
                 logger.info("");
             }
 
