@@ -44,7 +44,6 @@ public class MessageHandler {
     if (subtokens.length < 2) {
       // Se espera que cada token tenga el formato <key>:<value>
       // Se ignora si no tiene ese formato.
-      System.out.println("Mensaje mal formado");
       return;
     }
 
